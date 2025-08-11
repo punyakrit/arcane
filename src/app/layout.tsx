@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { prisma } from "@/lib/supabase/db";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,11 +23,18 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  console.log("Prisma Client:", prisma.$connect().then(() => {
+    console.log("Prisma Client connected successfully");
+  }).catch((error) => {
+    console.error("Error connecting Prisma Client:", error);
+  }));
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+
         {children}
       </body>
     </html>
