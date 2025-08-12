@@ -14,7 +14,7 @@ import { CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 function page() {
   return (
     <>
-      <section className="overflow-hidden px-4 sm:px-6 mt-10  sm:flex py-24  sm:flex-col gap-4 md:justify-center md:items-center">
+      <section className="overflow-hidden px-4 sm:px-6  sm:flex py-20  sm:flex-col gap-4 md:justify-center md:items-center">
         <TitleSection
           pill="✨ Your Ideas, Organized"
           title="The All-in-One Workspace for Teams and Creators"
