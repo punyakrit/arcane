@@ -65,7 +65,7 @@ function page() {
         />
       </section>
 
-      <section className="relative">
+      <section className="relative overflow-hidden">
         <div className="w-full blur-[120px] rounded-full h-32 absolute bg-brand-primary-purple/50 -z-10 top-56 " />
         <TitleSection
           title="Loved by teams and individuals worldwide"
