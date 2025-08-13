@@ -16,3 +16,14 @@ export async function actionLoginUser({ email, password }: z.infer<typeof FormSc
 
    return response
 }
+
+
+export async function actionSignUpUser({ email, password }: z.infer<typeof FormSchema>) {
+    const supabase = await createClient()
+    const response = await supabase.auth.signUp({
+        email,
+        password,
+    })
+
+    return response
+}

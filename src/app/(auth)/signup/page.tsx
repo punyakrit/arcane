@@ -1,39 +1,38 @@
 "use client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { actionSignUpUser } from "@/lib/server-actions/authActions";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
-import Link from "next/link";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { actionLoginUser } from "@/lib/server-actions/authActions";
 
-function Page() {
+function page() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitError, setSubmitError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [confirmEmail, setConfirmEmail] = useState(false);
 
-  const onSubmit = async (e: React.FormEvent) => {
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSubmitError("");
     setIsLoading(true);
-
+    setSubmitError("");
     try {
-      const { error } = await actionLoginUser({ email, password });
+      const { error } = await actionSignUpUser({ email, password });
       if (error) {
-        setSubmitError(error.message || "Error logging in");
+        setSubmitError(error.message || "Error signing up");
         return;
       }
+      setConfirmEmail(true);
       router.push("/dashboard");
-    } catch (err) {
+    } catch (error) {
       setSubmitError("Something went wrong. Please try again later.");
     } finally {
       setIsLoading(false);
-    
     }
-  };
-
+  }
   return (
     <form
       onSubmit={onSubmit}
@@ -71,6 +70,11 @@ function Page() {
       {submitError && (
         <p className="text-red-500 text-sm mt-2">{submitError}</p>
       )}
+      {confirmEmail && (
+        <p className="text-foreground/60 mt-2">
+          Please check your email for a confirmation link.
+        </p>
+      )}
 
       <Button
         className="w-full p-6 mt-6"
@@ -78,17 +82,17 @@ function Page() {
         disabled={isLoading}
         size="lg"
       >
-        {isLoading ? "Loading..." : "Login"}
+        {isLoading ? "Loading..." : "Sign Up"}
       </Button>
 
       <span className="self-contain mt-6">
-        Don&apos;t have an account?{" "}
-        <Link href={"/signup"} className="text-primary">
-          Sign Up
+        Already have an account?{" "}
+        <Link href={"/login"} className="text-primary">
+          Login
         </Link>
       </span>
     </form>
   );
 }
 
-export default Page;
+export default page;
