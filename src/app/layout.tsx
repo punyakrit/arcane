@@ -22,11 +22,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  console.log("Prisma Client:", prisma.$connect().then(() => {
-    console.log("Prisma Client connected successfully");
-  }).catch((error) => {
-    console.error("Error connecting Prisma Client:", error);
-  }));
+
 
   return (
     <html lang="en" suppressHydrationWarning>
