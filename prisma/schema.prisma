@@ -20,7 +20,17 @@ model WorkSpace {
   bannerUrl      String?
   data           String?
   folders        Folders[]
+  Collaborators Collaborators[]
 
+  @@schema("arcane")
+}
+
+model Collaborators {
+  id          String @id @default(uuid())
+  userId      String
+  createdAt   DateTime @default(now())
+  workSpaceId String 
+  workSpace   WorkSpace @relation(fields: [workSpaceId], references: [id], onDelete: Cascade)
   @@schema("arcane")
 }
 

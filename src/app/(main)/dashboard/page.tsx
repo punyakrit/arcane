@@ -39,7 +39,6 @@ async function page() {
   }
 
   redirect(`/dashboard/${workspace.id}`);
-  return <div>{JSON.stringify(workspace)}</div>;
 }
 
 export default page;
