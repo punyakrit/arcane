@@ -114,3 +114,14 @@ export async function getCollaboratorsWorkspace(user_id: string) {
 }
 
 
+export async function getSupabaseUserSearch(email: string) {
+    const users = await prisma.user.findMany({
+        where: {
+            email: {
+                contains: email,
+            }
+        },
+        take: 5,
+    })
+    return users
+}

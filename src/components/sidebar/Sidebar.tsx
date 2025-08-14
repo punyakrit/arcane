@@ -35,6 +35,8 @@ async function Sidebar({ params, className }: SidebarProps) {
     getCollaboratorsWorkspace(user.id),
   ]);
 
+  const collaboratorsWorkspaces = collaborators?.collaborators?.map((collaborator: any) => collaborator.workSpace) ?? [];
+
   return (
     <aside
       className={`hidden sm:flex sm:flex-col w-[280px] shrink-0 p-4 md:gap-4 !justify-between ${className}`}
@@ -42,12 +44,12 @@ async function Sidebar({ params, className }: SidebarProps) {
       <div>
         <WorkspaceDropDown
           privateWorkspaces={privateWorkspace?.privateWorkspace ?? []}
-          collaboratorsWorkspaces={collaborators?.collaborators ?? []}
+          collaboratorsWorkspaces={collaboratorsWorkspaces}
           defaultWorkspace={[
             ...(privateWorkspace?.privateWorkspace ?? []),
-            ...(collaborators?.collaborators?.filter(
-              (collaborator: any) => collaborator.id === workspaceId
-            ) ?? []),
+            ...(collaboratorsWorkspaces.filter(
+              (workspace: any) => workspace.id === workspaceId
+            )),
           ]}
         />
       </div>

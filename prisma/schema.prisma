@@ -64,3 +64,11 @@ model Files {
   @@schema("arcane")
 }
 
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+  userId    String   @unique
+
+  @@schema("arcane")
+}

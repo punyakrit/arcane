@@ -32,9 +32,12 @@ function WorkspaceDropDown({
   const [selectedWorkspace, setSelectedWorkspace] = useState<any>(null);
   const [isOpen, setIsOpen] = useState(false);
 
+
+
   const allWorkspaces = [...privateWorkspaces, ...collaboratorsWorkspaces];
 
   useEffect(() => {
+    console.log(allWorkspaces)
     const currentWorkspaceId = params.workspaceId as string;
     const currentWorkspace = allWorkspaces.find(
       (workspace) => workspace.id === currentWorkspaceId

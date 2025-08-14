@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -14,8 +14,9 @@ import { Label } from "../ui/label";
 import WorkspaceCreator from "./WorkspaceCreator";
 
 function CustomDialogTrigger() {
+    const [isOpen, setIsOpen] = useState(false);
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <button className="p-0 flex items-center gap-2 cursor-pointer h-10 w-full px-4">
           <Plus className="w-4 h-4" />
@@ -32,7 +33,7 @@ function CustomDialogTrigger() {
         </DialogHeader>
         <div className="flex flex-col gap-4 mt-4">
             <hr/>
-          <WorkspaceCreator />
+          <WorkspaceCreator setIsOpen={setIsOpen} />
         </div>
       </DialogContent>
     </Dialog>

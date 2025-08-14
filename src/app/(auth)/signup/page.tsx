@@ -21,6 +21,7 @@ function page() {
     setSubmitError("");
     try {
       const { error } = await actionSignUpUser({ email, password });
+      console.log(error)
       if (error) {
         setSubmitError(error.message || "Error signing up");
         return;
