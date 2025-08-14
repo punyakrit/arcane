@@ -11,6 +11,7 @@ import {
 import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
 import { Label } from "../ui/label";
+import WorkspaceCreator from "./WorkspaceCreator";
 
 function CustomDialogTrigger() {
   return (
@@ -21,7 +22,7 @@ function CustomDialogTrigger() {
           <span className="text-sm underline-offset-4">Add workspace</span>
         </button>
       </DialogTrigger>
-      <DialogContent className="h-screen sm:h-[440px] overflow-full">
+      <DialogContent className=" overflow-full">
         <DialogHeader>
           <DialogTitle>Create a new workspace</DialogTitle>
           <DialogDescription>
@@ -29,10 +30,9 @@ function CustomDialogTrigger() {
             can create multiple workspaces to organize your projects and tasks.
           </DialogDescription>
         </DialogHeader>
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <Label>Workspace name</Label>
-          </div>
+        <div className="flex flex-col gap-4 mt-4">
+            <hr/>
+          <WorkspaceCreator />
         </div>
       </DialogContent>
     </Dialog>

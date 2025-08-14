@@ -1,7 +1,6 @@
 
 import DashboardSetup from "@/components/dashboard/DashboardSetup";
 import { prisma } from "@/lib/supabase/db";
-import { getUserSubscription } from "@/lib/supabase/queries";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import React from "react";
@@ -25,15 +24,10 @@ async function page() {
     },
   });
 
-  const { subscription, error } = await getUserSubscription(user.id as string);
-  if (error) {
-    return <div>{JSON.stringify(error)}</div>;
-  }
-
   if (!workspace) {
     return (
       <div className="bg-background flex justify-center items-center h-screen w-screen">
-        <DashboardSetup user={user} subscription={subscription} />
+        <DashboardSetup user={user}  />
       </div>
     );
   }

@@ -16,10 +16,9 @@ import { createWorkspace } from "@/actions/workspace";
 
 interface DashboardSetupProps {
   user: User;
-  subscription: any | null;
 }
 
-function DashboardSetup({ user, subscription }: DashboardSetupProps) {
+function DashboardSetup({ user }: DashboardSetupProps) {
   const [selectedEmoji, setSelectedEmoji] = useState("💼");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -87,7 +86,7 @@ function DashboardSetup({ user, subscription }: DashboardSetupProps) {
                 accept="image/*"
                 placeholder="Workspace Logo"
                 className="mt-2"
-                disabled={subscription?.status !== "active"}
+                disabled={true}
                 required
               />
               <small className="text-xs text-muted-foreground">

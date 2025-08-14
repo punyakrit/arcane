@@ -2,7 +2,6 @@ import {
   getCollaboratorsWorkspace,
   getFolderById,
   getPrivateWorkspace,
-  getUserSubscription,
 } from "@/lib/supabase/queries";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -24,11 +23,10 @@ async function Sidebar({ params, className }: SidebarProps) {
   if (!user) {
     return;
   }
-  const { subscription, error } = await getUserSubscription(user.id);
 
   const { folder, errorFolder } = await getFolderById(workspaceId);
 
-  if (errorFolder || error) {
+  if (errorFolder) {
     redirect("/dashboard");
   }
 
