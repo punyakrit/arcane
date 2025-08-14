@@ -3,14 +3,13 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { prisma } from "@/lib/supabase/db";
 import { ThemeProvider } from "@/lib/provider/theme-provider";
-import {DM_Sans} from 'next/font/google';
+import { DM_Sans } from "next/font/google";
+import { SupabaseUserProvider } from "@/lib/provider/SupabaseUserProvider";
 
 
 const geistSans = DM_Sans({
   subsets: ["latin"],
 });
-
-
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -22,23 +21,20 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
-
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.className} bg-background`}
-      >
-         <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
+      <body className={`${geistSans.className} bg-background`}>
+
+
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
           >
 
-
-        {children}
-          </ThemeProvider>
+            {children}
+        </ThemeProvider>
       </body>
     </html>
   );
