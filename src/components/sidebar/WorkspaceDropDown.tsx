@@ -36,6 +36,10 @@ function WorkspaceDropDown({
 
   const allWorkspaces = [...privateWorkspaces, ...collaboratorsWorkspaces];
 
+  const isPrivateWorkspace = (workspaceId: string) => {
+    return privateWorkspaces.some(workspace => workspace.id === workspaceId);
+  };
+
   useEffect(() => {
     console.log(allWorkspaces)
     const currentWorkspaceId = params.workspaceId as string;
@@ -109,7 +113,12 @@ function WorkspaceDropDown({
                     }}
                   >
                     <span className="text-2xl mr-2">{workspace.iconId}</span>
-                    {workspace.title}
+                    <div className="flex flex-col flex-1">
+                      <span>{workspace.title}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {isPrivateWorkspace(workspace.id) ? "Private" : "Shared"}
+                      </span>
+                    </div>
                     <Check
                       className={cn(
                         "ml-auto",
