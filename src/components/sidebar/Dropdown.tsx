@@ -39,9 +39,14 @@ function Dropdown({
   ...props
 }: DropdownProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
   const [emoji, setEmoji] = useState(iconId);
   const [localTitle, setLocalTitle] = useState(title);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     setLocalTitle(title);
@@ -150,6 +155,39 @@ function Dropdown({
     setLocalTitle(newTitle);
   }
 
+
+  async function addNewFile(){
+
+  }
+
+  if (!isMounted) {
+    return (
+      <div className={listStyle}>
+        <div className="hover:no-underline py-1 px-1 text-sm rounded-md transition-colors w-full">
+          <div className={groupIdentifier}>
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="flex-shrink-0">
+                <div
+                  className={clsx(
+                    "text-3xl p-2 h-auto cursor-pointer border rounded-md",
+                    {
+                      "text-sm": true,
+                    }
+                  )}
+                >
+                  {emoji}
+                </div>
+              </div>
+              <div className="outline-none bg-transparent text-sm truncate min-w-0 flex-1 w-[70px]">
+                {listType === "folder" ? folderTitle : textTitle}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <AccordionItem
       value={id}
@@ -161,7 +199,7 @@ function Dropdown({
     >
       <AccordionTrigger
         id={listType}
-        className="hover:no-underline py-3 px-3 text-sm hover:bg-muted/50 rounded-md transition-colors w-full"
+        className="hover:no-underline py-1 px-1 text-sm hover:bg-muted/50 rounded-md transition-colors w-full"
         disabled={listType === "file"}
       >
         <div className={groupIdentifier}>
@@ -191,27 +229,21 @@ function Dropdown({
           </div>
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 ml-2">
             {listType === "folder" && !isEditing && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0 hover:bg-muted"
+              <div
+                className="h-6 w-6 p-0 hover:bg-muted rounded-sm flex items-center justify-center cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
               >
                 <PlusIcon className="w-3 h-3" />
-              </Button>
+              </div>
             )}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive"
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
+            <div
+              className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive rounded-sm flex items-center justify-center cursor-pointer"
+              onClick={addNewFile}
             >
               <Trash className="w-3 h-3" />
-            </Button>
+            </div>
           </div>
         </div>
       </AccordionTrigger>

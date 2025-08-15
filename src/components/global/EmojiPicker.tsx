@@ -1,7 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import {
   EmojiPicker,
@@ -15,24 +15,43 @@ import clsx from "clsx";
 interface EmojiPickerProps {
   children: React.ReactNode;
   getValue: (emoji: string) => void;
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg";
 }
 
 function EmojiPickers({ children, getValue, size }: EmojiPickerProps) {
   const [isOpen, setIsOpen] = useState(false);
-    const route = useRouter();
+  const [isMounted, setIsMounted] = useState(false);
+  const route = useRouter();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return (
+      <div className={clsx("text-3xl p-2 h-auto cursor-pointer border rounded-md", {
+        "text-xs": size === "xs",
+        "text-sm": size === "sm",
+        "text-md": size === "md",
+        "text-lg": size === "lg",
+      })}>
+        {children}
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center">
       <Popover onOpenChange={setIsOpen} open={isOpen}>
-        <PopoverTrigger asChild>
-          <Button variant="outline" className={clsx("text-3xl p-2 h-auto", {
+        <PopoverTrigger>
+          <div className={clsx("text-3xl p-2 h-auto cursor-pointer border rounded-md hover:bg-accent hover:text-accent-foreground transition-colors", {
+            "text-xs": size === "xs",
             "text-sm": size === "sm",
             "text-md": size === "md",
             "text-lg": size === "lg",
           })}>
             {children}
-          </Button>
+          </div>
         </PopoverTrigger>
         <PopoverContent className="w-fit p-0">
           <EmojiPicker
