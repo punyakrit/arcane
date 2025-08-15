@@ -60,8 +60,10 @@ function Dropdown({
   }, []);
 
   useEffect(() => {
-    setLocalTitle(title);
-  }, [title]);
+    if (!isEditing) {
+      setLocalTitle(title);
+    }
+  }, [title, isEditing]);
 
   useEffect(() => {
     setEmoji(iconId);
@@ -109,7 +111,6 @@ function Dropdown({
   async function onChangeEmoji(emoji: string, itemId: string) {
     try {
       if (listType === "folder") {
-        setEmoji(emoji);
         const { error, result } = await updateFolder(
           {
             id: itemId,
@@ -119,9 +120,9 @@ function Dropdown({
         );
 
         if (error) {
-          setEmoji(iconId);
           toast.error("Failed to update emoji");
         } else {
+          setEmoji(emoji);
           setFolder({
             ...folder,
             iconId: emoji,
@@ -140,6 +141,7 @@ function Dropdown({
         if (error) {
           toast.error("Failed to update emoji");
         } else {
+          setEmoji(emoji);
           const updatedFiles = files.map((file: Files) => 
             file.id === itemId ? { ...file, iconId: emoji, folderId: file.folderId, inTrash: file.inTrash } : file
           );
@@ -171,10 +173,9 @@ function Dropdown({
         if (error) {
           toast.error("Failed to update title");
           setLocalTitle(folder.title);
-        } else {
           setFolder({
             ...folder,
-            title: newTitle,
+            title: folder.title,
           } as Folders);
         }
       } else if (listType === "file") {
@@ -189,22 +190,29 @@ function Dropdown({
         if (error) {
           toast.error("Failed to update title");
           setLocalTitle(title);
-        } else {
-          const updatedFiles = files.map((file: Files) => 
-            file.id === id ? { ...file, title: newTitle, folderId: file.folderId, inTrash: file.inTrash } : file
+          const revertedFiles = files.map((file: Files) => 
+            file.id === id ? { ...file, title: title, folderId: file.folderId, inTrash: file.inTrash } : file
           );
-          setFiles(updatedFiles);
+          setFiles(revertedFiles);
         }
       }
     },
-    [folderId, folder, setFolder, listType, id, title, setFiles]
+    [folderId, folder, setFolder, listType, id, title, files, setFiles]
   );
 
   async function handleBlur() {
     setIsEditing(false);
     if (listType === "folder" && localTitle !== folder.title) {
+      setFolder({
+        ...folder,
+        title: localTitle,
+      } as Folders);
       await debouncedUpdate(localTitle);
     } else if (listType === "file" && localTitle !== title) {
+      const updatedFiles = files.map((file: Files) => 
+        file.id === id ? { ...file, title: localTitle, folderId: file.folderId, inTrash: file.inTrash } : file
+      );
+      setFiles(updatedFiles);
       await debouncedUpdate(localTitle);
     }
   }
@@ -261,8 +269,7 @@ function Dropdown({
       if (error) {
         toast.error("Failed to delete file");
       } else {
-        const updatedFiles = files.filter((file: Files) => file.id !== id);
-        setFiles(updatedFiles);
+        setFiles(files.filter((file: Files) => file.id !== id));
         toast.success("File deleted");
       }
     }
@@ -347,6 +354,7 @@ function Dropdown({
 
   return (
     <AccordionItem
+      key={id}
       value={id}
       className={listStyle}
       onClick={(e) => {

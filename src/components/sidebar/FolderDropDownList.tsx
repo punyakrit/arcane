@@ -112,17 +112,22 @@ function FolderDropDownList({
                   workspaceId={workspaceId}
                   folderId={folder.id}
                   folder={folder}
-                  setFolder={(folder: Folders) => {
-                    setFolders(folders.map((f) => (f.id === folder.id ? folder : f)));
+                  setFolder={(updatedFolder: Folders) => {
+                    setFolders(prevFolders => 
+                      prevFolders.map((f) => (f.id === updatedFolder.id ? updatedFolder : f))
+                    );
                   }}
                   files={files}
-                  setFiles={(files: Files[]) => {
-                    setFiles(files);
+                  setFiles={(updatedFiles: Files[]) => {
+                    setFiles(updatedFiles);
                   }}
                   onFileAdded={(folderId) => {
-                    if (!openFolders.includes(folderId)) {
-                      setOpenFolders([...openFolders, folderId]);
-                    }
+                    setOpenFolders(prevOpenFolders => {
+                      if (!prevOpenFolders.includes(folderId)) {
+                        return [...prevOpenFolders, folderId];
+                      }
+                      return prevOpenFolders;
+                    });
                   }}
                 />
               </div>
