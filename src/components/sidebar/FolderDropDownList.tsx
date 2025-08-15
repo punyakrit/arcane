@@ -12,6 +12,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../ui/accordion";
+import { Button } from "../ui/button";
+import Dropdown from "./Dropdown";
 
 interface FolderDropDownListProps {
   workSpaceFolders: Folders[];
@@ -51,34 +53,50 @@ function FolderDropDownList({
   }
 
   return (
-    <>
-      <div className="flex sticky z-20 top-0 bg-background w-full h-10 group/title justify-between items-center pr-4 text-white/80">
-        <div className="font-bold text-xm flex justify-between items-center w-full">
-          <span>Folders</span>
+    <div className="w-full overflow-hidden">
+      <div className="flex w-full h-12 justify-between items-center px-2 py-2 text-white/80 border-b border-border/50 mb-3 relative z-10">
+        <div className="font-bold text-sm flex justify-between items-center w-full min-w-0">
+          <span className="truncate">Folders</span>
 
-          <PlusIcon
-            onClick={addFolderHandler}
-            size={24}
-            className="transition-transform duration-500 text-white/40 group-hover/title:inline-block cursor-pointer hover:dark:text-white ml-2"
-          />
+          <div className="flex items-center flex-shrink-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={addFolderHandler}
+              className="h-8 w-8 p-0 bg-muted/20 hover:bg-muted/50 text-white border border-border/50 relative z-20 cursor-pointer"
+            >
+              <PlusIcon className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
-      <div className="flex flex-col gap-2 mr-4">
+      <div className="flex flex-col gap-1 relative z-0 w-full overflow-hidden">
         <Accordion
           type="multiple"
           defaultValue={folders.map((folder) => folder.id) || ""}
-          className=" pb-20"
+          className="pb-20 w-full"
         >
           {folders
             .filter((folder) => folder.inTrash === null)
             .map((folder) => (
-              <div key={folder.id}>
-                
+              <div key={folder.id} className="relative w-full">
+                <Dropdown
+                  title={folder.title}
+                  id={folder.id}
+                  listType="folder"
+                  iconId={folder.iconId || ""}
+                  workspaceId={workspaceId}
+                  folderId={folder.id}
+                  folder={folder}
+                  setFolder={(folder: Folders) => {
+                    setFolders(folders.map((f) => (f.id === folder.id ? folder : f)));
+                  }}
+                />
               </div>
             ))}
         </Accordion>
       </div>
-    </>
+    </div>
   );
 }
 

@@ -150,3 +150,23 @@ export async function createFolder(folder: Folders) {
         }
     }
 }
+
+export async function updateFolder(folder: Partial<Folders>, folderId: string) {
+    try{
+        const updatedFolder = await prisma.folders.update({
+            where: {
+                id: folderId
+            },
+            data: folder
+        })
+        return {
+            error: null,
+            result: updatedFolder
+        }
+    } catch (e) {
+        return {
+            error: e,
+            result: null
+        }
+    }
+}

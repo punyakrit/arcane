@@ -10,13 +10,15 @@ import {
   EmojiPickerSearch,
 } from "../ui/emoji-picker";
 import { Button } from "../ui/button";
+import clsx from "clsx";
 
 interface EmojiPickerProps {
   children: React.ReactNode;
   getValue: (emoji: string) => void;
+  size?: "sm" | "md" | "lg";
 }
 
-function EmojiPickers({ children, getValue }: EmojiPickerProps) {
+function EmojiPickers({ children, getValue, size }: EmojiPickerProps) {
   const [isOpen, setIsOpen] = useState(false);
     const route = useRouter();
 
@@ -24,7 +26,11 @@ function EmojiPickers({ children, getValue }: EmojiPickerProps) {
     <div className="flex items-center">
       <Popover onOpenChange={setIsOpen} open={isOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" className="text-4xl p-2 h-auto">
+          <Button variant="outline" className={clsx("text-3xl p-2 h-auto", {
+            "text-sm": size === "sm",
+            "text-md": size === "md",
+            "text-lg": size === "lg",
+          })}>
             {children}
           </Button>
         </PopoverTrigger>
