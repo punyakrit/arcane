@@ -7,7 +7,9 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import React from "react";
 import WorkspaceDropDown from "./WorkspaceDropDown";
-
+import NativeNavigation from "./NativeNavigation";
+import { ScrollArea } from "../ui/scroll-area";
+import FolderDropDownList from "./FolderDropDownList";
 interface SidebarProps {
   params: { workspaceId: string };
   className?: string;
@@ -52,6 +54,14 @@ async function Sidebar({ params, className }: SidebarProps) {
             )),
           ]}
         />
+        <hr className="my-4"/>
+        <NativeNavigation workspaceId={workspaceId} />
+        <hr className="my-4"/>
+        <ScrollArea className=" overflow-scroll relative h-[450px]">
+          <div className="pointer-events-none w-full absolute bottom-0 h-20 bg-gradient-to-t from-background to-transparent z-40">
+          </div>
+          <FolderDropDownList workSpaceFolders={folder ?? []} workspaceId={workspaceId} />
+        </ScrollArea>
       </div>
     </aside>
   );

@@ -4,8 +4,8 @@ import "./globals.css";
 import { prisma } from "@/lib/supabase/db";
 import { ThemeProvider } from "@/lib/provider/theme-provider";
 import { DM_Sans } from "next/font/google";
-import { SupabaseUserProvider } from "@/lib/provider/SupabaseUserProvider";
 
+import { Toaster } from "@/components/ui/sonner"
 
 const geistSans = DM_Sans({
   subsets: ["latin"],
@@ -35,6 +35,7 @@ export default function RootLayout({
 
             {children}
         </ThemeProvider>
+        <Toaster />
       </body>
     </html>
   );

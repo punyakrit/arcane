@@ -1,5 +1,6 @@
 "use server"
 
+import { Folders } from "@prisma/client"
 import { prisma } from "./db"
 import { createClient } from "./server"
 
@@ -14,6 +15,12 @@ export async function getFolderById(workspaceId: string) {
             select: {
                 id: true,
                 title: true,
+                iconId: true,
+                data: true,
+                inTrash: true,
+                bannerUrl: true,
+                workSpaceId: true,
+                createdAt: true,
             },
             orderBy: {
                 createdAt: "asc"
@@ -124,4 +131,22 @@ export async function getSupabaseUserSearch(email: string) {
         take: 5,
     })
     return users
+}
+
+
+export async function createFolder(folder: Folders) {
+    try {
+        const newFolder = await prisma.folders.create({
+            data: folder
+        })
+    return {
+            error: null,
+            result: newFolder
+        }
+    } catch (e) {
+        return {
+            error: e,
+            result: null
+        }
+    }
 }
