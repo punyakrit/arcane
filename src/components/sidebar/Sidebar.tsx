@@ -1,5 +1,6 @@
 import {
   getCollaboratorsWorkspace,
+  getFilesByFolderId,
   getFolderById,
   getPrivateWorkspace,
 } from "@/lib/supabase/queries";
@@ -18,6 +19,7 @@ interface SidebarProps {
 async function Sidebar({ params, className }: SidebarProps) {
   const { workspaceId } = await params;
   const supabase = await createClient();
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -27,6 +29,7 @@ async function Sidebar({ params, className }: SidebarProps) {
   }
 
   const { folder, errorFolder } = await getFolderById(workspaceId);
+
 
   if (errorFolder) {
     redirect("/dashboard");
@@ -43,7 +46,7 @@ async function Sidebar({ params, className }: SidebarProps) {
     <aside
       className={`hidden sm:flex sm:flex-col w-[280px] shrink-0 p-4 md:gap-4 !justify-between ${className}`}
     >
-      <div>
+      <div className="flex flex-col h-full">
         <WorkspaceDropDown
           privateWorkspaces={privateWorkspace?.privateWorkspace ?? []}
           collaboratorsWorkspaces={collaboratorsWorkspaces}
@@ -57,11 +60,9 @@ async function Sidebar({ params, className }: SidebarProps) {
         <hr className="my-4"/>
         <NativeNavigation workspaceId={workspaceId} />
         <hr className="my-4"/>
-        <ScrollArea className=" overflow-scroll relative h-[450px]">
-          <div className="pointer-events-none w-full absolute bottom-0 h-20 bg-gradient-to-t from-background to-transparent z-40">
-          </div>
+        <div className="flex-1 min-h-0">
           <FolderDropDownList workSpaceFolders={folder ?? []} workspaceId={workspaceId} />
-        </ScrollArea>
+        </div>
       </div>
     </aside>
   );

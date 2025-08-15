@@ -1,6 +1,6 @@
 "use server"
 
-import { Folders } from "@prisma/client"
+import { Files, Folders } from "@prisma/client"
 import { prisma } from "./db"
 import { createClient } from "./server"
 
@@ -162,6 +162,133 @@ export async function updateFolder(folder: Partial<Folders>, folderId: string) {
         return {
             error: null,
             result: updatedFolder
+        }
+    } catch (e) {
+        return {
+            error: e,
+            result: null
+        }
+    }
+}
+
+export async function createFile(file: Files) {
+    try {
+        const newFile = await prisma.files.create({
+            data: file
+        })
+        return {
+            error: null,
+            result: newFile
+        }
+    } catch (e) {
+        return {
+            error: e,
+            result: null
+        }
+    }
+}
+
+
+export async function getFilesByFolderId(folderId: string) {
+    try {
+        const files = await prisma.files.findMany({
+            where: {
+                folderId: folderId
+            },
+            select: {
+                id: true,
+                title: true,
+                iconId: true,
+                data: true,
+                createdAt: true,
+                folderId: true,
+                inTrash: true,
+                bannerUrl: true
+            }
+        })
+        return {
+            error: null,
+            result: files
+        }
+    } catch (e) {
+        return {
+            error: e,
+            result: null
+        }
+    }
+}
+
+export async function updateFile(file: Partial<Files>, fileId: string) {
+    try {
+        const updatedFile = await prisma.files.update({
+            where: {
+                id: fileId
+            },
+            data: file
+        })
+        return {
+            error: null,
+            result: updatedFile
+        }
+    } catch (e) {
+        return {
+            error: e,
+            result: null
+        }
+    }
+}
+
+
+export async function deleteFolder(folderId: string) {
+    try {
+        const deletedFolder = await prisma.folders.delete({
+            where: {
+                id: folderId
+            }
+        })
+        return {
+            error: null,
+            result: deletedFolder
+        }
+    } catch (e) {
+        return {
+            error: e,
+            result: null
+        }
+    }
+}
+
+export async function deleteFiles(fileId: string) {
+    try {
+        const deletedFile = await prisma.files.delete({
+            where: {
+                id: fileId
+            }
+        })
+        return {
+            error: null,
+            result: deletedFile
+        }
+    } catch (e) {
+        return {
+            error: e,
+            result: null
+        }
+    }
+}
+
+
+export async function updateFileById(fileId: string, file: Partial<Files>) {
+    try {
+        const updatedFile = await prisma.files.update({
+            where: {
+                id: fileId
+            },
+            data: file
+        })
+        return {
+            error: null,
+            result: updatedFile
         }
     } catch (e) {
         return {

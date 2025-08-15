@@ -22,6 +22,7 @@ import { getSupabaseUser } from "@/lib/provider/getSupabaseUser";
 import CollabSearch from "./CollabSearch";
 import { ScrollArea } from "../ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { toast } from "sonner";
 
 function WorkspaceCreator({
   setIsOpen,
@@ -53,11 +54,15 @@ function WorkspaceCreator({
       };
       if (permission === "private") {
         const response = await createWorkspaceDirect(workspace);
+        toast.success("Workspace created successfully");
+
         router.refresh();
       }
       if (permission === "public") {
         const response = await createWorkspaceDirect(workspace);
         const resposne2 = await addCollaborator(collaborators, id);
+        toast.success("Workspace created successfully");
+
         router.refresh();
       }
     }

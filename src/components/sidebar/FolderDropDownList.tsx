@@ -1,10 +1,10 @@
 "use client";
-import { Folders } from "@prisma/client";
+import { Files, Folders } from "@prisma/client";
 import React, { useEffect, useState } from "react";
 import ToolTipCOmponent from "../global/ToolTipCOmponent";
 import { PlusIcon } from "lucide-react";
 import { generateUUID } from "@/lib/server-actions/exportuuid";
-import { createFolder } from "@/lib/supabase/queries";
+import { createFolder, getFilesByFolderId } from "@/lib/supabase/queries";
 import { toast } from "sonner";
 import {
   Accordion,
@@ -14,6 +14,7 @@ import {
 } from "../ui/accordion";
 import { Button } from "../ui/button";
 import Dropdown from "./Dropdown";
+import { ScrollArea } from "../ui/scroll-area";
 
 interface FolderDropDownListProps {
   workSpaceFolders: Folders[];
@@ -25,7 +26,26 @@ function FolderDropDownList({
   workspaceId,
 }: FolderDropDownListProps) {
   const [folders, setFolders] = useState<Folders[]>(workSpaceFolders || []);
+  const [files, setFiles] = useState<Files[]>([]);
+  const [openFolders, setOpenFolders] = useState<string[]>([]);
 
+
+  useEffect(() => {
+    const fetchFiles = async () => {
+      let allFiles: Files[] = [];
+      for (const folder of folders) {
+        const { error, result } = await getFilesByFolderId(folder.id);
+        if (error) {
+          toast.error("Failed to fetch files");
+        } else {
+          allFiles = [...allFiles, ...(result || [])];
+        }
+      }
+      setFiles(allFiles);
+    };
+    fetchFiles();
+  }, [folders]);
+  
   useEffect(() => {
     setFolders(workSpaceFolders || []);
   }, [workSpaceFolders, workspaceId]);
@@ -53,8 +73,8 @@ function FolderDropDownList({
   }
 
   return (
-    <div className="w-full overflow-hidden">
-      <div className="flex w-full h-12 justify-between items-center px-2 py-2 text-white/80 border-b border-border/50 mb-3 relative z-10">
+    <div className="w-full overflow-hidden flex flex-col h-full max-h-[450px]">
+      <div className="flex w-full h-12 justify-between items-center px-2 py-2 text-white/80 border-b border-border/50 relative z-10 bg-background flex-shrink-0">
         <div className="font-bold text-sm flex justify-between items-center w-full min-w-0">
           <span className="truncate">Folders</span>
 
@@ -70,15 +90,19 @@ function FolderDropDownList({
           </div>
         </div>
       </div>
-      <div className="flex flex-col gap-1 relative z-0 w-full overflow-hidden">
+      <ScrollArea className="flex-1 overflow-scroll relative"> 
+      <div className="flex flex-col gap-1 relative z-0 w-full overflow-hidden pt-2">
         <Accordion
           type="multiple"
-          defaultValue={folders.map((folder) => folder.id) || ""}
+          value={openFolders}
+          onValueChange={setOpenFolders}
           className="pb-20 w-full"
         >
           {folders
             .filter((folder) => folder.inTrash === null)
+            .sort((a, b) => a.title.localeCompare(b.title))
             .map((folder) => (
+
               <div key={folder.id} className="relative w-full">
                 <Dropdown
                   title={folder.title}
@@ -91,11 +115,21 @@ function FolderDropDownList({
                   setFolder={(folder: Folders) => {
                     setFolders(folders.map((f) => (f.id === folder.id ? folder : f)));
                   }}
+                  files={files}
+                  setFiles={(files: Files[]) => {
+                    setFiles(files);
+                  }}
+                  onFileAdded={(folderId) => {
+                    if (!openFolders.includes(folderId)) {
+                      setOpenFolders([...openFolders, folderId]);
+                    }
+                  }}
                 />
               </div>
             ))}
         </Accordion>
       </div>
+      </ScrollArea>
     </div>
   );
 }

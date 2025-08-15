@@ -31,15 +31,7 @@ function NativeNavigation({ workspaceId, className }: NativeNavigationProps) {
             <span className="text-sm">Settings</span>
           </Link>
         </li>
-        <li>
-          <Link
-            href={`/dashboard/${workspaceId}`}
-            className="group/native flex text-white/70 gap-2 items-center"
-          >
-            <Trash className="w-4 h-4" />
-            <span className="text-sm">Trash</span>
-          </Link>
-        </li>
+        
       </ul>
     </nav>
   );
