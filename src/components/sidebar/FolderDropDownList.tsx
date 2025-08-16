@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import ToolTipCOmponent from "../global/ToolTipCOmponent";
 import { PlusIcon } from "lucide-react";
 import { generateUUID } from "@/lib/server-actions/exportuuid";
-import { createFolder, getFilesByFolderId } from "@/lib/supabase/queries";
+import { useWorkspaceStore } from "@/lib/store/workspace-store";
 import { toast } from "sonner";
 import {
   Accordion,
@@ -17,58 +17,34 @@ import Dropdown from "./Dropdown";
 import { ScrollArea } from "../ui/scroll-area";
 
 interface FolderDropDownListProps {
-  workSpaceFolders: Folders[];
   workspaceId: string;
 }
 
 function FolderDropDownList({
-  workSpaceFolders,
   workspaceId,
 }: FolderDropDownListProps) {
-  const [folders, setFolders] = useState<Folders[]>(workSpaceFolders || []);
-  const [files, setFiles] = useState<Files[]>([]);
+  const { folders, files, addFolder, loadFolderFiles } = useWorkspaceStore();
   const [openFolders, setOpenFolders] = useState<string[]>([]);
 
 
-  useEffect(() => {
-    const fetchFiles = async () => {
-      let allFiles: Files[] = [];
-      for (const folder of folders) {
-        const { error, result } = await getFilesByFolderId(folder.id);
-        if (error) {
-          toast.error("Failed to fetch files");
-        } else {
-          allFiles = [...allFiles, ...(result || [])];
-        }
-      }
-      setFiles(allFiles);
-    };
-    fetchFiles();
-  }, [folders]);
-  
-  useEffect(() => {
-    setFolders(workSpaceFolders || []);
-  }, [workSpaceFolders, workspaceId]);
-
   async function addFolderHandler() {
-    const id = await generateUUID();
-    const newFolder: Folders = {
-      id: id,
-      title: "Untitled Folder",
-      data: null,
-      workSpaceId: workspaceId,
-      createdAt: new Date(),
-      iconId: "📁",
-      inTrash: null,
-      bannerUrl: "",
-    };
+    try {
+      const id = await generateUUID();
+      const newFolder: Folders = {
+        id: id,
+        title: "Untitled Folder",
+        data: null,
+        workSpaceId: workspaceId,
+        createdAt: new Date(),
+        iconId: "📁",
+        inTrash: null,
+        bannerUrl: "",
+      };
 
-    const { error, result } = await createFolder(newFolder);
-    if (error) {
-      toast.error("Failed to create a new folder");
-    } else {
-      setFolders([result as Folders, ...(folders || [])]);
+      await addFolder(newFolder);
       toast.success("Created a new folder");
+    } catch (error) {
+      toast.error("Failed to create a new folder");
     }
   }
 
@@ -112,15 +88,7 @@ function FolderDropDownList({
                   workspaceId={workspaceId}
                   folderId={folder.id}
                   folder={folder}
-                  setFolder={(updatedFolder: Folders) => {
-                    setFolders(prevFolders => 
-                      prevFolders.map((f) => (f.id === updatedFolder.id ? updatedFolder : f))
-                    );
-                  }}
-                  files={files}
-                  setFiles={(updatedFiles: Files[]) => {
-                    setFiles(updatedFiles);
-                  }}
+                  files={folder.files || []}
                   onFileAdded={(folderId) => {
                     setOpenFolders(prevOpenFolders => {
                       if (!prevOpenFolders.includes(folderId)) {

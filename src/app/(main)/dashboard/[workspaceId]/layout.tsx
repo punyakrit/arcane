@@ -1,20 +1,24 @@
 import React from "react";
 import Sidebar from "@/components/sidebar/Sidebar";
+import { WorkspaceProvider } from "@/lib/provider/workspace-provider";
 
 interface LayoutProps {
   children: React.ReactNode;
-  params: any;
+  params: { workspaceId: string };
 }
 
-function layout({ children, params }: LayoutProps) {
+async function layout({ children, params }: LayoutProps) {
+  const workspaceId = (await params).workspaceId;
+  
   return (
-    <main className="flex overflow-hidden h-screen w-screen ">
-      <Sidebar params={params} />
-      <div className="dark:border-neutral-500/70 border-l-[1px] w-full relative overflow-scroll">
-      {children}
-
-      </div>
-    </main>
+    <WorkspaceProvider initialWorkspaceId={workspaceId}>
+      <main className="flex overflow-hidden h-screen w-screen ">
+        <Sidebar params={{ workspaceId }} />
+        <div className="dark:border-neutral-500/70 border-l-[1px] w-full relative overflow-scroll">
+          {children}
+        </div>
+      </main>
+    </WorkspaceProvider>
   );
 }
 

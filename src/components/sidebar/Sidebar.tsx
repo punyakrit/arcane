@@ -17,7 +17,7 @@ interface SidebarProps {
 }
 
 async function Sidebar({ params, className }: SidebarProps) {
-  const { workspaceId } = await params;
+  const { workspaceId } =await params;
   const supabase = await createClient();
 
   const {
@@ -61,7 +61,7 @@ async function Sidebar({ params, className }: SidebarProps) {
         <NativeNavigation workspaceId={workspaceId} />
         <hr className="my-4"/>
         <div className="flex-1 min-h-0">
-          <FolderDropDownList workSpaceFolders={folder ?? []} workspaceId={workspaceId} />
+          <FolderDropDownList workspaceId={workspaceId} />
         </div>
       </div>
     </aside>

@@ -9,7 +9,7 @@ import {
 import clsx from "clsx";
 import { EmojiPicker } from "../ui/emoji-picker";
 import EmojiPickers from "../global/EmojiPicker";
-import { createFile, deleteFolder, updateFolder, updateFile, deleteFiles } from "@/lib/supabase/queries";
+import { useWorkspaceStore, FolderWithFiles } from "@/lib/store/workspace-store";
 import { Files, Folders } from "@prisma/client";
 import { toast } from "sonner";
 import { readonly } from "zod";
@@ -26,10 +26,8 @@ interface DropdownProps {
   disabled?: boolean;
   workspaceId: string;
   folderId: string;
-  folder: Folders;
-  setFolder: (folder: Folders) => void;
+  folder?: FolderWithFiles;
   files: Files[];
-  setFiles: (files: Files[]) => void;
   onFileAdded?: (folderId: string) => void;
 }
 
@@ -42,10 +40,8 @@ function Dropdown({
   disabled,
   workspaceId,
   folderId,
-  setFolder,
   folder,
   files,
-  setFiles,
   onFileAdded,
   ...props
 }: DropdownProps) {
@@ -54,6 +50,19 @@ function Dropdown({
   const router = useRouter();
   const [emoji, setEmoji] = useState(iconId);
   const [localTitle, setLocalTitle] = useState(title);
+  
+  const { 
+    updateFolderInStore, 
+    updateFileInStore, 
+    addFile, 
+    deleteFolderFromStore, 
+    deleteFileFromStore,
+    folders: globalFolders,
+    files: globalFiles
+  } = useWorkspaceStore();
+  
+  const currentFolder = folder || globalFolders.find((f: FolderWithFiles) => f.id === folderId);
+  const currentFiles = files.length > 0 ? files : (currentFolder?.files || []);
 
   useEffect(() => {
     setIsMounted(true);
@@ -111,49 +120,18 @@ function Dropdown({
   async function onChangeEmoji(emoji: string, itemId: string) {
     try {
       if (listType === "folder") {
-        const { error, result } = await updateFolder(
-          {
-            id: itemId,
-            iconId: emoji,
-          },
-          itemId
-        );
-
-        if (error) {
-          toast.error("Failed to update emoji");
-        } else {
-          setEmoji(emoji);
-          setFolder({
-            ...folder,
-            iconId: emoji,
-          } as Folders);
-          toast.success("Emoji updated");
-        }
+        await updateFolderInStore(itemId, { iconId: emoji });
+        setEmoji(emoji);
+        toast.success("Emoji updated");
       } else if (listType === "file") {
-        const { error, result } = await updateFile(
-          {
-            id: itemId,
-            iconId: emoji,
-          },
-          itemId
-        );
-
-        if (error) {
-          toast.error("Failed to update emoji");
-        } else {
-          setEmoji(emoji);
-          const updatedFiles = files.map((file: Files) => 
-            file.id === itemId ? { ...file, iconId: emoji, folderId: file.folderId, inTrash: file.inTrash } : file
-          );
-          setFiles(updatedFiles);
-          toast.success("Emoji updated");
-        }
+        await updateFileInStore(itemId, { iconId: emoji });
+        setEmoji(emoji);
+        toast.success("Emoji updated");
       }
     } catch (err) {
       console.error("Error updating emoji:", err);
       toast.error("Failed to update emoji");
     }
-    router.refresh()
   }
 
   function handleDoubleClick() {
@@ -162,59 +140,23 @@ function Dropdown({
 
   const debouncedUpdate = useCallback(
     async (newTitle: string) => {
-      if (listType === "folder") {
-        const { error } = await updateFolder(
-          {
-            id: folderId,
-            title: newTitle,
-          },
-          folderId
-        );
-
-        if (error) {
-          toast.error("Failed to update title");
-          setLocalTitle(folder.title);
-          setFolder({
-            ...folder,
-            title: folder.title,
-          } as Folders);
+      try {
+        if (listType === "folder") {
+          await updateFolderInStore(folderId, { title: newTitle });
+        } else if (listType === "file") {
+          await updateFileInStore(id, { title: newTitle });
         }
-      } else if (listType === "file") {
-        const { error } = await updateFile(
-          {
-            id: id,
-            title: newTitle,
-          },
-          id
-        );
-
-        if (error) {
-          toast.error("Failed to update title");
-          setLocalTitle(title);
-          const revertedFiles = files.map((file: Files) => 
-            file.id === id ? { ...file, title: title, folderId: file.folderId, inTrash: file.inTrash } : file
-          );
-          setFiles(revertedFiles);
-        }
+      } catch (error) {
+        toast.error("Failed to update title");
+        setLocalTitle(title);
       }
-      router.refresh()
     },
-    [folderId, folder, setFolder, listType, id, title, files, setFiles]
+    [folderId, listType, id, title, updateFolderInStore, updateFileInStore]
   );
 
   async function handleBlur() {
     setIsEditing(false);
-    if (listType === "folder" && localTitle !== folder.title) {
-      setFolder({
-        ...folder,
-        title: localTitle,
-      } as Folders);
-      await debouncedUpdate(localTitle);
-    } else if (listType === "file" && localTitle !== title) {
-      const updatedFiles = files.map((file: Files) => 
-        file.id === id ? { ...file, title: localTitle, folderId: file.folderId, inTrash: file.inTrash } : file
-      );
-      setFiles(updatedFiles);
+    if (localTitle !== title) {
       await debouncedUpdate(localTitle);
     }
   }
@@ -226,7 +168,6 @@ function Dropdown({
 
   async function addNewFile() {
     try {
-      console.log("addNewFile");
       if (!workspaceId) {
         return;
       }
@@ -241,14 +182,9 @@ function Dropdown({
         createdAt: new Date(),
       };
 
-      const { error, result } = await createFile(newFile);
-      if (error) {
-        toast.error("Failed to add new file");
-      } else {
-        toast.success("New file added");
-        setFiles([...files, result as Files]);
-        onFileAdded?.(folderId);
-      }
+      await addFile(newFile);
+      toast.success("New file added");
+      onFileAdded?.(folderId);
     } catch (err) {
       console.error("Error adding new file:", err);
       toast.error("Failed to add new file");
@@ -258,22 +194,17 @@ function Dropdown({
   async function deleteFile(e: React.MouseEvent<HTMLButtonElement>) {
     e.stopPropagation();
     
-    if (listType === "folder") {
-      const { error } = await deleteFolder(id);
-      if (error) {
-        toast.error("Failed to delete folder");
-      } else {
+    try {
+      if (listType === "folder") {
+        await deleteFolderFromStore(id);
         toast.success("Folder deleted");
         router.push(`/dashboard/${workspaceId}`);
-      }
-    } else if (listType === "file") {
-      const { error } = await deleteFiles(id);
-      if (error) {
-        toast.error("Failed to delete file");
-      } else {
-        setFiles(files.filter((file: Files) => file.id !== id));
+      } else if (listType === "file") {
+        await deleteFileFromStore(id);
         toast.success("File deleted");
       }
+    } catch (error) {
+      toast.error(`Failed to delete ${listType}`);
     }
   }
 
@@ -415,10 +346,10 @@ function Dropdown({
         </div>
       </AccordionTrigger>
       <AccordionContent className="p-0">
-        {files
-          .filter((file) => file.folderId === folderId)
-          .filter((file) => !file.inTrash )
-          .map((file) => (
+        {currentFiles
+          .filter((file: Files) => file.folderId === folderId)
+          .filter((file: Files) => !file.inTrash )
+          .map((file: Files) => (
             <Dropdown
               key={file.id}
               title={file.title}
@@ -427,10 +358,8 @@ function Dropdown({
               iconId={file.iconId || ""}
               workspaceId={workspaceId}
               folderId={folderId}
-              folder={folder}
-              setFolder={setFolder}
+              folder={currentFolder}
               files={[]}
-              setFiles={setFiles}
               onFileAdded={onFileAdded}
             />
           ))}
