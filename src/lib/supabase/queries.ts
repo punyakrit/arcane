@@ -428,3 +428,32 @@ export async function deleteWorkspace(workspaceId: string) {
     })
     return respsone
 }
+
+
+export async function getWorkspaceById(workspaceId: string) {
+    const workspace = await prisma.workSpace.findFirst({
+        where: {
+            id: workspaceId
+        },
+    })
+    return workspace
+}
+
+
+export async function getFolderByIdQuill(folderId: string) {
+    const folder = await prisma.folders.findUnique({
+        where: {
+            id: folderId
+        }
+    })
+    return folder
+}   
+
+export async function getFileByIdQuill(fileId: string) {
+    const file = await prisma.files.findUnique({
+        where: {
+            id: fileId
+        }
+    })
+    return file
+}

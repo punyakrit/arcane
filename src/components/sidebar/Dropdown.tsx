@@ -153,6 +153,7 @@ function Dropdown({
       console.error("Error updating emoji:", err);
       toast.error("Failed to update emoji");
     }
+    router.refresh()
   }
 
   function handleDoubleClick() {
@@ -196,6 +197,7 @@ function Dropdown({
           setFiles(revertedFiles);
         }
       }
+      router.refresh()
     },
     [folderId, folder, setFolder, listType, id, title, files, setFiles]
   );
