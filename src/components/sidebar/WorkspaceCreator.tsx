@@ -17,8 +17,9 @@ import { generateUUID } from "@/lib/server-actions/exportuuid";
 import { WorkSpace } from "@prisma/client";
 import { addCollaborator, createWorkspaceDirect } from "@/actions/workspace";
 import { useRouter } from "next/navigation";
-import { User } from "@supabase/supabase-js";
+import { User } from "@prisma/client";
 import { getSupabaseUser } from "@/lib/provider/getSupabaseUser";
+import { getPrismaUserBySupabaseId } from "@/lib/supabase/queries";
 import CollabSearch from "./CollabSearch";
 import { ScrollArea } from "../ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -37,14 +38,21 @@ function WorkspaceCreator({
 
   async function handleCreateWorkspace() {
     setIsLoading(true);
-    const user = await getSupabaseUser();
+    const supabaseUser = await getSupabaseUser();
     const id = await generateUUID();
-    console.log(user);
-    if (user) {
+    console.log(supabaseUser);
+    if (supabaseUser) {
+      const { result: user } = await getPrismaUserBySupabaseId(supabaseUser.id);
+      if (!user) {
+        toast.error("User not found");
+        setIsLoading(false);
+        return;
+      }
+      
       const workspace: WorkSpace = {
         id: id,
         title: title,
-        workSpaceOwner: user?.id as string,
+        workSpaceOwner: user.userId,
         iconId: "💼",
         createdAt: new Date(),
         inTrash: null,
@@ -142,7 +150,6 @@ function WorkspaceCreator({
                   {collaborators.map((collaborator) => (
                     <div key={collaborator.id} className="flex items-center gap-2 p-2 hover:bg-muted/50 rounded">
                       <Avatar className="w-6 h-6">
-                        <AvatarImage src={collaborator.user_metadata?.avatar_url} />
                         <AvatarFallback className="text-xs">
                           {collaborator.email?.charAt(0).toUpperCase() || "U"}
                         </AvatarFallback>

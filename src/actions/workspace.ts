@@ -1,6 +1,6 @@
 "use server";
 
-import { User } from "@supabase/supabase-js";
+import { User } from "@prisma/client";
 import { prisma } from "@/lib/supabase/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -12,7 +12,6 @@ export async function createWorkspace(
   user: User,
   selectedEmoji: string
 ) {
-  const supabase = createClient();
   const workspaceName = formData.get("workspace-name") as string;
   const workspaceLogo = formData.get("workspace-logo") as any;
   const workspaceId = crypto.randomUUID();
@@ -23,7 +22,7 @@ export async function createWorkspace(
     data: {
       id: workspaceId,
       title: workspaceName,
-      workSpaceOwner: user.id,
+      workSpaceOwner: user.userId,
       iconId: selectedEmoji,
     }
   });
@@ -42,20 +41,21 @@ export const createWorkspaceDirect = async (workspace: WorkSpace) => {
 
 
 export const addCollaborator = async (collaborators: User[], workspaceId: string) => {
-  const respsone = collaborators.forEach(async (user: User) => {
+  const response = collaborators.forEach(async (user: User) => {
     const userExists = await prisma.collaborators.findFirst({
       where:{
-        userId: user.id,
+        userId: user.userId,
         workSpaceId: workspaceId,
       }
     })
     if (!userExists) {
       const response = await prisma.collaborators.create({
         data: {
-          userId: user.id,
+          userId: user.userId,
           workSpaceId: workspaceId,
         },
       });
     }
   })
+  return response;
 }

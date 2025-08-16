@@ -1,6 +1,6 @@
 "use server"
 
-import { Files, Folders } from "@prisma/client"
+import { Files, Folders, WorkSpace } from "@prisma/client"
 import { prisma } from "./db"
 import { createClient } from "./server"
 
@@ -296,4 +296,135 @@ export async function updateFileById(fileId: string, file: Partial<Files>) {
             result: null
         }
     }
+}
+
+
+export async function getWorkspaceDetails(workspaceId: string) {
+    const workspace = await prisma.workSpace.findUnique({
+        where: {
+            id: workspaceId
+        }
+    })
+    return workspace
+}
+
+
+export async function updateWorkspaceDetails(workspaceId: string, data: Partial<WorkSpace>) {
+    const workspace = await prisma.workSpace.update({
+        where: {
+            id: workspaceId
+        },
+        data: data
+    })
+    return workspace
+}
+
+export async function getWorkspaceCollaborators(workspaceId: string) {
+    try {
+        const collaborators = await prisma.collaborators.findMany({
+            where: {
+                workSpaceId: workspaceId
+            },
+            select: {
+                id: true,
+                userId: true,
+                createdAt: true
+            }
+        })
+        return {
+            error: null,
+            result: collaborators
+        }
+    } catch (e) {
+        return {
+            error: e,
+            result: null
+        }
+    }
+}
+
+export async function getUserById(userId: string) {
+    try {
+        const user = await prisma.user.findUnique({
+            where: {
+                userId: userId
+            },
+            select: {
+                id: true,
+                email: true,
+                userId: true,
+                createdAt: true
+            }
+        })
+        
+        if (!user) {
+            return {
+                error: "User not found",
+                result: null
+            }
+        }
+        
+        return {
+            error: null,
+            result: user
+        }
+    } catch (e) {
+        return {
+            error: e,
+            result: null
+        }
+    }
+}
+
+export async function getPrismaUserBySupabaseId(supabaseUserId: string) {
+    try {
+        const user = await prisma.user.findUnique({
+            where: {
+                userId: supabaseUserId
+            },
+            select: {
+                id: true,
+                email: true,
+                userId: true,
+                createdAt: true
+            }
+        })
+        
+        if (!user) {
+            return {
+                error: "User not found",
+                result: null
+            }
+        }
+        
+        return {
+            error: null,
+            result: user
+        }
+    } catch (e) {
+        return {
+            error: e,
+            result: null
+        }
+    }
+}
+
+export async function removeCollaboratorFromWorkspace(workspaceId: string, collaboratorId: string) {
+
+    const respsone = await prisma.collaborators.delete({
+        where: {
+            id: collaboratorId,
+            workSpaceId: workspaceId
+        }
+    })
+    return respsone
+}
+
+export async function deleteWorkspace(workspaceId: string) {
+    const respsone = await prisma.workSpace.delete({
+        where: {
+            id: workspaceId
+        }
+    })
+    return respsone
 }

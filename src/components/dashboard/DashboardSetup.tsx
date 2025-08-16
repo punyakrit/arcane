@@ -1,5 +1,5 @@
 "use client";
-import { User } from "@supabase/supabase-js";
+import { User } from "@prisma/client";
 import React, { useState } from "react";
 import {
   Card,

@@ -1,5 +1,5 @@
 "use client";
-import { User } from "@supabase/supabase-js";
+import { User } from "@prisma/client";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Sheet,
@@ -55,7 +55,7 @@ function CollabSearch({
         const res = await getSupabaseUserSearch(value)
 
         if(res){
-            setSearchResults(res as unknown as User[])
+            setSearchResults(res)
         }
     }, 500);
   };
@@ -96,15 +96,14 @@ function CollabSearch({
                 </div>
               ) : searchResults.length > 0 ? (
                 searchResults
-                  .filter((user) => !existingCollaborators.some(collab => collab.id === user.id))
+                  .filter((user) => !existingCollaborators.some(collab => collab.userId === user.userId))
                   .map((user) => (
                     <div
-                      key={user.id}
+                      key={user.userId}
                       className="p-4 flex items-center justify-between w-full hover:bg-muted/50 rounded-lg transition-colors"
                     >
                       <div className="flex items-center gap-3">
                         <Avatar className="w-10 h-10">
-                          <AvatarImage src={user.user_metadata?.avatar_url} />
                           <AvatarFallback className="bg-muted text-muted-foreground">
                             {user.email?.charAt(0).toUpperCase() || "U"}
                           </AvatarFallback>

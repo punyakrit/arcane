@@ -31,7 +31,7 @@ function Settings({ children, workspaceId }: SettingsProps) {
         </DialogHeader>
         <div className="flex flex-col gap-4 mt-4">
             <hr/>
-          <SettingsForms workspaceId={workspaceId} />
+          <SettingsForms workspaceId={workspaceId} closeModal={() => setIsOpen(false)} />
         </div>
       </DialogContent>
     </Dialog>
