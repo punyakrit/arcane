@@ -271,7 +271,6 @@ function quillEditors({ dirType, fileId }: quillEditorsProps) {
     }
   }
 
-
   async function handleDeleteBanner() {
     setDeleteBannerLoading(true);
     if (dirType === "workspace" && currentData?.id) {
@@ -285,61 +284,65 @@ function quillEditors({ dirType, fileId }: quillEditorsProps) {
   }
 
   return (
-    <div className="flex justify-center w-full">
-      <div className="w-[800px] max-w-full">
-        <div className="flex flex-col-reverse sm:flex-row sm:justify-between justify-center sm:items-center sm:p-2 p-8">
-          <div>{breadcrumbs}</div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 justify-center h-10">
-              {collaborators.map((collaborator) => (
-                <Avatar
-                  key={collaborator.id}
-                  className="-ml-4 bg-background border-2 flex items-center justify-center border-white h-8 w-8 rounded-full"
-                >
-                  <AvatarImage
-                    className="rounded-full"
-                    src={collaborator.avatarUrl ? collaborator.avatarUrl : ""}
-                  />
-                  <AvatarFallback>
-                    {collaborator.email.substring(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              ))}
-            </div>
-            {saving ? (
-              <div className="flex items-center gap-2">
+    <div className="w-full">
+      <div className="flex justify-center">
+        <div className="w-full max-w-[1200px]">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-between justify-center sm:items-center sm:p-2 p-8">
+            <div>{breadcrumbs}</div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 justify-center h-10">
+                {collaborators.map((collaborator) => (
+                  <Avatar
+                    key={collaborator.id}
+                    className="-ml-4 bg-background border-2 flex items-center justify-center border-white h-8 w-8 rounded-full"
+                  >
+                    <AvatarImage
+                      className="rounded-full"
+                      src={collaborator.avatarUrl ? collaborator.avatarUrl : ""}
+                    />
+                    <AvatarFallback>
+                      {collaborator.email.substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                ))}
+              </div>
+              {saving ? (
+                <div className="flex items-center gap-2">
+                  <Badge
+                    variant="secondary"
+                    className="bg-orange-500 top-6 text-white"
+                  >
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Saving...</span>
+                  </Badge>
+                </div>
+              ) : (
                 <Badge
                   variant="secondary"
-                  className="bg-orange-500 top-6 text-white"
+                  className="bg-green-500 text-white top-6"
                 >
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Saving...</span>
+                  <Check className="w-4 h-4" />
+                  <span>Saved</span>
                 </Badge>
-              </div>
-            ) : (
-              <Badge
-                variant="secondary"
-                className="bg-green-500 text-white top-6"
-              >
-                <Check className="w-4 h-4" />
-                <span>Saved</span>
-              </Badge>
-            )}
+              )}
+            </div>
           </div>
         </div>
-        {currentData?.bannerUrl && (
-          <div className="relative w-full h-[200px] mb-4">
-            <Image
-              className="w-full h-full object-cover rounded-lg"
-              alt="banner"
-              fill
-              src={getBannerImageUrl(currentData.bannerUrl) || ""}
-            />
-          </div>
-        )}
+      </div>
+      
+      {currentData?.bannerUrl && (
+        <div className="relative w-full h-[200px] mb-4">
+          <Image
+            className="w-full h-full object-cover rounded-lg"
+            alt="banner"
+            fill
+            src={getBannerImageUrl(currentData.bannerUrl) || ""}
+          />
+        </div>
+      )}
 
-        <div className="flex justify-center items-center flex-col mt-2 relative">
-          <div className="w-full flex flex-col px-7 lg:py-4">
+      <div className="flex justify-center items-center flex-col mt-2 relative">
+        <div className="flex flex-col px-7 lg:py-4 w-[800px] max-w-full">
             <div className="text-[80px]">
               <EmojiPickers
                 getValue={(emoji: any) =>
@@ -380,15 +383,23 @@ function quillEditors({ dirType, fileId }: quillEditorsProps) {
                 )}
               </div>
             </div>
+            <span className="text-3xl text-muted-foreground h-9 font-bold mt-4">
+              {currentData?.title}
+            </span>
+            <span className="text-sm text-muted-foreground">
+              {dirType === "workspace" ? "WORKSPACE" : dirType === "folder" ? "FOLDER" : "FILE"}
+            </span>
           </div>
-          <div
-            id="container"
-            ref={containerRef as any}
-            className="w-full"
-          ></div>
+          <div className="w-[800px] max-w-full">
+            <div
+              id="container"
+              ref={containerRef as any}
+              className=""
+            ></div>
+          </div>
         </div>
       </div>
-    </div>
+    // </div>
   );
 }
 
