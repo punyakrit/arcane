@@ -18,6 +18,8 @@ import EmojiPickers from "../global/EmojiPicker";
 import { toast } from "sonner";
 import BannerUpload from "../banner/BannerUpload";
 import { Button } from "../ui/button";
+import { useSocket } from "@/lib/provider/socket-provider";
+import { getUserById } from "@/lib/supabase/queries";
 
 interface quillEditorsProps {
   dirType: "workspace" | "folder" | "file";
@@ -39,7 +41,7 @@ var TOOLBAR_OPTIONS = [
   [{ align: [] }],
   ["clean"],
   ["link", "image", "blockquote", "code-block"],
-  [{ list: "ordered" }, { list: "bullet" }],
+  [{ list: "ordered" }, { list: "bullet" }]
 ];
 
 const supabase = createClient();
@@ -122,6 +124,7 @@ async function testStorageAccess() {
 function quillEditors({ dirType, fileId }: quillEditorsProps) {
   const [quillEditor, setQuillEditor] = useState<any>(null);
   const [deleteBannerLoading, setDeleteBannerLoading] = useState(false);
+  const { socket, isConnected } = useSocket();
   const {
     breadcrumb,
     currentWorkspace,
@@ -133,16 +136,14 @@ function quillEditors({ dirType, fileId }: quillEditorsProps) {
   } = useWorkspaceStore();
   const [collaborators, setCollaborators] = useState<
     { id: string; avatarUrl: string; email: string }[]
-  >([
-    {
-      id: "1",
-      avatarUrl: "https://github.com/shadcn.png",
-      email: "shadcn@gmail.com",
-    },
-  ]);
+  >([]);
 
   const [saving, setSaving] = useState(false);
   const [selectedEmoji, setSelectedEmoji] = useState<string>("");
+  const [localCursors, setLocalCursors] = useState<any>([]);
+  const [user, setUser] = useState<any>(null);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isSaving = useRef(false);
   const breadcrumbs = useMemo(() => {
     const breadcrumbParts = [];
 
@@ -218,25 +219,227 @@ function quillEditors({ dirType, fileId }: quillEditorsProps) {
     ]
   );
 
-  // useEffect(() => {
-  //   if (quillEditor && currentData?.data) {
-  //     quillEditor.setContents(JSON.parse(currentData.data || '{}'));
-  //   }
-  // }, [quillEditor, currentData?.data]);
+  useEffect(() => {
+    if (quillEditor && currentData?.data && !isSaving.current) {
+      // Store current selection before updating content
+      const selection = quillEditor.getSelection();
+      const currentContent = JSON.stringify(quillEditor.getContents());
+      const newContent = currentData.data || "{}";
+      
+      // Only update content if it's actually different to avoid unnecessary cursor resets
+      if (currentContent !== newContent) {
+        quillEditor.setContents(JSON.parse(newContent));
+        
+        // Restore selection if it was valid and user had focus
+        if (selection && document.hasFocus()) {
+          const newLength = quillEditor.getLength();
+          const adjustedIndex = Math.min(selection.index, Math.max(0, newLength - 1));
+          const adjustedLength = Math.min(selection.length, newLength - adjustedIndex);
+          
+          setTimeout(() => {
+            try {
+              quillEditor.setSelection(adjustedIndex, adjustedLength);
+            } catch (error) {
+              // Fallback if selection fails
+              console.warn('Could not restore cursor position:', error);
+            }
+          }, 0);
+        }
+      }
+    }
+  }, [quillEditor, currentData?.data]);
 
-  // useEffect(() => {
-  //   if (quillEditor) {
-  //     const handler = () => {
-  //       const content = JSON.stringify(quillEditor.getContents());
-  //       handleContentChange(content);
-  //     };
+  useEffect(() => {
+    const getUserData = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUserData();
+  }, []);
 
-  //     quillEditor.on('text-change', handler);
-  //     return () => {
-  //       quillEditor.off('text-change', handler);
-  //     };
-  //   }
-  // }, [quillEditor, handleContentChange]);
+  useEffect(() => {
+    if (quillEditor === null || socket === null || !currentData?.id || !localCursors.length || !isConnected)
+      return;
+    const socketHandler = (range: any, roomId: string, cursorId: string) => {
+      if (roomId === currentData?.id) {
+        const cursorToMove = localCursors.find(
+          (c: any) => c.cursors()?.[0].id === cursorId
+        );
+        if (cursorToMove) {
+          cursorToMove.moveCursor(cursorId, range);
+        }
+      }
+    };
+    socket.on('receive-cursor-move', socketHandler);
+    return () => {
+      socket.off('receive-cursor-move', socketHandler);
+    };
+  }, [quillEditor, socket, currentData?.id, localCursors]);
+
+  useEffect(() => {
+    if (socket === null || quillEditor === null || !currentData?.id || !isConnected) return;
+    
+    console.log('🏠 Joining room:', currentData?.id);
+    socket.emit('create-room', currentData?.id);
+    
+    // Cleanup function to leave room when component unmounts or dependencies change
+    return () => {
+      if (socket && currentData?.id) {
+        console.log('🚪 Leaving room:', currentData?.id);
+        socket.emit('leave-room', currentData?.id);
+      }
+    };
+  }, [socket, quillEditor, currentData?.id]);
+
+  useEffect(() => {
+    if (quillEditor === null || socket === null || !currentData?.id || !user || !isConnected) return;
+    
+    console.log('🔧 Setting up Quill event handlers for room:', currentData?.id);
+
+    const selectionChangeHandler = (cursorId: string) => {
+      return (range: any, oldRange: any, source: any) => {
+        if (source === 'user' && cursorId && isConnected && socket.connected) {
+          socket.emit('send-cursor-move', range, currentData?.id, cursorId);
+        }
+      };
+    };
+    
+    const quillHandler = (delta: any, oldDelta: any, source: any) => {
+      console.log('📝 Text change detected:', source);
+      if (source !== 'user') return;
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      setSaving(true);
+      isSaving.current = true;
+      const contents = quillEditor.getContents();
+      const quillLength = quillEditor.getLength();
+      
+      // Store current cursor position
+      const selection = quillEditor.getSelection();
+      
+      saveTimerRef.current = setTimeout(async () => {
+        if (contents && quillLength !== 1 && currentData?.id) {
+          try {
+            if (dirType === 'workspace' && currentData?.id) {
+              await updateWorkspaceInStore(currentData.id, { data: JSON.stringify(contents) });
+            } else if (dirType === 'folder' && currentData?.id) {
+              await updateFolderInStore(currentData.id, { data: JSON.stringify(contents) });
+            } else if (dirType === 'file' && currentData?.id) {
+              await updateFileInStore(currentData.id, { data: JSON.stringify(contents) });
+            }
+            
+            // Restore cursor position after save
+            if (selection && quillEditor) {
+              setTimeout(() => {
+                quillEditor.setSelection(selection.index, selection.length);
+              }, 0);
+            }
+          } catch (error) {
+            console.error('Failed to save content:', error);
+          }
+        }
+        setSaving(false);
+        isSaving.current = false;
+      }, 850);
+
+      if (isConnected && socket && socket.connected) {
+        socket.emit('send-changes', delta, currentData?.id);
+        console.log('✅ Changes sent to room:', currentData?.id);
+      } else {
+        console.error('❌ Socket not connected, cannot send changes');
+      }
+    };
+    
+    quillEditor.on('text-change', quillHandler);
+    quillEditor.on('selection-change', selectionChangeHandler(user.id));
+
+    return () => {
+      console.log('🧹 Cleaning up Quill event handlers');
+      quillEditor.off('text-change', quillHandler);
+      quillEditor.off('selection-change', selectionChangeHandler);
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
+  }, [quillEditor, socket, currentData?.id, user]);
+
+  useEffect(() => {
+    if (quillEditor === null || socket === null || !isConnected) return;
+    const socketHandler = (deltas: any, id: string) => {
+      console.log('📥 Received socket changes for room:', id);
+      if (id === currentData?.id) {
+        console.log('✅ Applying changes to editor');
+        // Store current selection before applying remote changes
+        const selection = quillEditor.getSelection();
+        const oldLength = quillEditor.getLength();
+        // Apply the remote changes
+        quillEditor.updateContents(deltas);
+        
+        // Only restore selection if this user had focus and the position is still valid
+        if (selection && document.hasFocus() && !isSaving.current) {
+          const newLength = quillEditor.getLength();
+          // Adjust selection if content length changed
+          const adjustedIndex = Math.min(selection.index, newLength - 1);
+          const adjustedLength = Math.min(selection.length, newLength - adjustedIndex);
+          
+          setTimeout(() => {
+            try {
+              quillEditor.setSelection(adjustedIndex, adjustedLength);
+            } catch (error) {
+              // Fallback to end of document if selection fails
+              quillEditor.setSelection(quillEditor.getLength() - 1, 0);
+            }
+          }, 0);
+        }
+      }
+    };
+    socket.on('receive-changes', socketHandler);
+    return () => {
+      socket.off('receive-changes', socketHandler);
+    };
+  }, [quillEditor, socket, currentData?.id]);
+
+  useEffect(() => {
+    if (!currentData?.id || quillEditor === null) return;
+    const room = supabase.channel(currentData?.id);
+    const subscription = room
+      .on('presence', { event: 'sync' }, () => {
+        const newState = room.presenceState();
+        const newCollaborators = Object.values(newState).flat() as any;
+        setCollaborators(newCollaborators);
+        if (user) {
+          const allCursors: any = [];
+          newCollaborators.forEach(
+            (collaborator: { id: string; email: string; avatarUrl: string }) => {
+              if (collaborator.id !== user.id) {
+                const userCursor = quillEditor.getModule('cursors');
+                userCursor.createCursor(
+                  collaborator.id,
+                  collaborator.email.split('@')[0],
+                  `#${Math.random().toString(16).slice(2, 8)}`
+                );
+                allCursors.push(userCursor);
+              }
+            }
+          );
+          setLocalCursors(allCursors);
+        }
+      })
+      .subscribe(async (status) => {
+        if (status !== 'SUBSCRIBED' || !user) return;
+        const response = await getUserById(user.id);
+        if (!response) return;
+
+        room.track({
+          id: user.id,
+          email: user.email?.split('@')[0],
+          avatarUrl: response.result?.id 
+            ? supabase.storage.from('avatars').getPublicUrl(`avatar-${response.result.id}`)
+                .data.publicUrl
+            : '',
+        });
+      });
+    return () => {
+      supabase.removeChannel(room);
+    };
+  }, [currentData?.id, quillEditor, supabase, user]);
 
   const containerRef = useCallback(async (wrapper: HTMLDivElement) => {
     if (typeof window !== "undefined") {
@@ -245,13 +448,20 @@ function quillEditors({ dirType, fileId }: quillEditorsProps) {
       wrapper.innerHTML = "";
       const editor = document.createElement("div");
       wrapper.append(editor);
-      const quill = (await import("quill")).default;
-      const quillEditor = new quill(editor, {
+      const Quill = (await import("quill")).default;
+      const QuillCursors = (await import("quill-cursors")).default;
+      Quill.register("modules/cursors", QuillCursors);
+      const quillEditor = new Quill(editor, {
         theme: "snow",
         modules: {
           toolbar: TOOLBAR_OPTIONS,
+          cursors: {
+            transformOnTextChange: true,
+          },
         },
       });
+      
+      console.log("📝 Quill editor initialized:", !!quillEditor);
       setQuillEditor(quillEditor);
     }
   }, []);
@@ -329,7 +539,7 @@ function quillEditors({ dirType, fileId }: quillEditorsProps) {
           </div>
         </div>
       </div>
-      
+
       {currentData?.bannerUrl && (
         <div className="relative w-full h-[200px] mb-4">
           <Image
@@ -343,62 +553,66 @@ function quillEditors({ dirType, fileId }: quillEditorsProps) {
 
       <div className="flex justify-center items-center flex-col mt-2 relative">
         <div className="flex flex-col px-7 lg:py-4 w-[800px] max-w-full">
-            <div className="text-[80px]">
-              <EmojiPickers
-                getValue={(emoji: any) =>
-                  onChangeEmoji(emoji, currentData?.id || "")
-                }
-              >
-                <div className="w-[100px] cursor-pointer text-[80px] transition-colors h-[100px] flex items-center justify-center hover:bg-muted rounded-xl">
-                  {currentData?.iconId}
-                </div>
-              </EmojiPickers>
-            </div>
-            <div>
-              <div className="flex items-center">
-                <BannerUpload
-                  dirType={dirType}
-                  fileId={fileId}
-                  className="mt-2 text-sm text-muted-foreground p-2 transition-all rounded-md cursor-pointer"
-                >
-                  {currentData?.bannerUrl ? "Change Banner" : "Upload Banner"}
-                </BannerUpload>
-                {currentData?.bannerUrl && (
-                  <>
-                    <Button
-                      onClick={handleDeleteBanner}
-                      variant="ghost"
-                      className="gap-4 ml-4 mt-2 text-sm text-muted-foreground p-2 transition-all rounded-md cursor-pointer"
-                    >
-                      {deleteBannerLoading ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <>
-                          <Trash className="w-4 h-4" />
-                          <span>Delete Banner</span>
-                        </>
-                      )}
-                    </Button>
-                  </>
-                )}
+          <div className="text-[80px]">
+            <EmojiPickers
+              getValue={(emoji: any) =>
+                onChangeEmoji(emoji, currentData?.id || "")
+              }
+            >
+              <div className="w-[100px] cursor-pointer text-[80px] transition-colors h-[100px] flex items-center justify-center hover:bg-muted rounded-xl">
+                {currentData?.iconId}
               </div>
+            </EmojiPickers>
+          </div>
+          <div>
+            <div className="flex items-center">
+              <BannerUpload
+                dirType={dirType}
+                fileId={fileId}
+                className="mt-2 text-sm text-muted-foreground p-2 transition-all rounded-md cursor-pointer"
+              >
+                {currentData?.bannerUrl ? "Change Banner" : "Upload Banner"}
+              </BannerUpload>
+              {currentData?.bannerUrl && (
+                <>
+                  <Button
+                    onClick={handleDeleteBanner}
+                    variant="ghost"
+                    className="gap-4 ml-4 mt-2 text-sm text-muted-foreground p-2 transition-all rounded-md cursor-pointer"
+                  >
+                    {deleteBannerLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>
+                        <Trash className="w-4 h-4" />
+                        <span>Delete Banner</span>
+                      </>
+                    )}
+                  </Button>
+                </>
+              )}
             </div>
-            <span className="text-3xl text-muted-foreground h-9 font-bold mt-4">
-              {currentData?.title}
-            </span>
-            <span className="text-sm text-muted-foreground">
-              {dirType === "workspace" ? "WORKSPACE" : dirType === "folder" ? "FOLDER" : "FILE"}
-            </span>
           </div>
-          <div className="w-[800px] max-w-full">
-            <div
-              id="container"
-              ref={containerRef as any}
-              className=""
-            ></div>
-          </div>
+          <span className="text-3xl text-muted-foreground h-9 font-bold mt-4">
+            {currentData?.title}
+          </span>
+          <span className="text-sm text-muted-foreground">
+            {dirType === "workspace"
+              ? "WORKSPACE"
+              : dirType === "folder"
+              ? "FOLDER"
+              : "FILE"}
+          </span>
+        </div>
+        <div className="w-[800px] max-w-full">
+          <div
+            id="container"
+            ref={containerRef as any}
+            className="h-[500px]"
+          ></div>
         </div>
       </div>
+    </div>
     // </div>
   );
 }

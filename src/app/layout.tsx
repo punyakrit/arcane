@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/lib/provider/theme-provider";
 import { DM_Sans } from "next/font/google";
 
 import { Toaster } from "@/components/ui/sonner"
+import { SocketProvider } from "@/lib/provider/socket-provider";
 
 const geistSans = DM_Sans({
   subsets: ["latin"],
@@ -32,10 +33,13 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
           >
+            <SocketProvider>
 
             {children}
-        </ThemeProvider>
         <Toaster />
+            </SocketProvider>
+
+        </ThemeProvider>
       </body>
     </html>
   );
