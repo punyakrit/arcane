@@ -3,46 +3,11 @@
 
 Arcane is a powerful, AI-driven workspace platform that brings together notes, tasks, documents, databases, and team collaboration in one beautifully designed interface. Built with modern web technologies and designed for teams of all sizes.
 
-## ✨ Features
-
-### 🤖 AI-Powered Content
-- Smart content suggestions and auto-completion
-- AI-assisted writing and content generation
-- Intelligent document summarization
-- Automated workflow suggestions
-
-### 👥 Real-time Collaboration
-- Live editing with multiple users
-- Instant comments and discussions
-- Real-time cursor tracking
-- Seamless file sharing
 
 ### 🚀 All-in-One Workspace
 - Rich text editor with advanced formatting
-- Kanban boards and project management
-- Database and spreadsheet functionality
-- Calendar and scheduling integration
 - Whiteboard and visual collaboration
-
-### 🔗 Advanced Integrations
-- Connect with 100+ popular tools
-- Slack, Discord, and Teams integration
-- GitHub and GitLab sync
-- Google Drive and Dropbox support
-- Custom API integrations
-
-### 🔍 Powerful Search
-- Full-text search across all content
-- Advanced filtering and sorting
-- Tag-based organization
-- Smart content discovery
-
-### 🔒 Enterprise Security
-- Bank-level encryption (AES-256)
-- Single Sign-On (SSO) support
-- SAML authentication
-- SOC 2 and GDPR compliance
-- Advanced audit logs
+- Live editing with multiple users
 
 ## 🚀 Getting Started
 

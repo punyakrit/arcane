@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 import React from "react";
-import QuillEditors from "@/components/quillEditor/QuillEditors";
+import QuillEditors from "@/components/quillEditor/quillEditors";
 
 async function page({ params }: { params: { workspaceId: string } }) {
   const id = (await params).workspaceId;

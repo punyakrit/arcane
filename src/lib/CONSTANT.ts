@@ -14,99 +14,74 @@ export const CLIENTS = [
 
 export const USERS = [
   {
-    name: 'Alice',
+    name: 'Sarah Chen',
     message:
-      'Cypress has been a game-changer for our team. With its reliable end-to-end testing, we catch bugs early, leading to faster development cycles and improved collaboration.',
+      'Arcane transformed our startup workflow completely. Having all our docs, tasks, and team communication in one place increased our productivity by 300%. Best investment we made this year.',
+    role: 'Startup Founder',
+    company: 'TechFlow'
   },
   {
-    name: 'Bob',
+    name: 'Marcus Rodriguez',
     message:
-      "I used to spend hours debugging frontend issues, but Cypress simplified everything. Now, I'm more productive, and my colleagues can trust our code thanks to Cypress.",
+      "Finally, a workspace that doesn't make me switch between 10 different apps. Arcane's seamless integration between notes, databases, and project management is incredible.",
+    role: 'Product Manager',
+    company: 'InnovateCorp'
   },
   {
-    name: 'Charlie',
+    name: 'Emily Thompson',
     message:
-      "Cypress has transformed the way we work. Our QA and development teams are on the same page, and our productivity has skyrocketed. It's a must-have tool.",
+      "As a freelancer, I needed something that could handle client projects, invoicing, and creative work. Arcane does it all without breaking the bank. Game changer!",
+    role: 'Creative Director',
+    company: 'Freelancer'
   },
   {
-    name: 'David',
+    name: 'David Kim',
     message:
-      'I was skeptical at first, but Cypress exceeded my expectations. Our project timelines have improved, and collaboration between teams is seamless.',
+      'Our remote team of 50+ people collaborates seamlessly on Arcane. Real-time editing, version control, and project tracking have never been this smooth.',
+    role: 'Engineering Lead',
+    company: 'CloudScale'
   },
   {
-    name: 'Ella',
+    name: 'Jessica Park',
     message:
-      "Cypress made writing and running tests a breeze. Our team's productivity has never been higher, and we're delivering more reliable software.",
+      "I've tried Notion, Slack, Asana - you name it. Arcane combines the best of all worlds with a beautiful, intuitive interface that my whole team actually wants to use.",
+    role: 'Operations Director',
+    company: 'GrowthLab'
   },
   {
-    name: 'Frank',
+    name: 'Ahmed Hassan',
     message:
-      "Thanks to Cypress, we've eliminated testing bottlenecks. Our developers and testers collaborate effortlessly, resulting in quicker releases.",
+      "The AI-powered content suggestions and automated workflows saved our team 20+ hours per week. Arcane pays for itself in productivity gains.",
+    role: 'Digital Marketing Manager',
+    company: 'BrandForge'
   },
   {
-    name: 'Grace',
+    name: 'Lisa Wang',
     message:
-      'Cypress has improved our development process significantly. We now have more time for innovation, and our products are of higher quality.',
+      'Migrating from our old toolstack to Arcane was seamless. The import tools worked flawlessly, and now our data is actually organized and searchable.',
+    role: 'Data Analyst',
+    company: 'InsightCo'
   },
   {
-    name: 'Hank',
+    name: 'Robert Johnson',
     message:
-      "Cypress's user-friendly interface made it easy for our non-technical team members to contribute to testing. Our workflow is much more efficient now.",
+      "Educational content creation has never been easier. Arcane's collaboration features help our distributed team create courses that engage thousands of students.",
+    role: 'Education Director',
+    company: 'LearnHub'
   },
   {
-    name: 'Ivy',
+    name: 'Priya Sharma',
     message:
-      "Our team's collaboration improved immensely with Cypress. We catch issues early, leading to less friction and quicker feature deployments.",
+      "The customizable templates and workflow automations fit perfectly into our agency's client management process. Our clients love the transparency too.",
+    role: 'Agency Owner',
+    company: 'Creative Solutions'
   },
   {
-    name: 'Jack',
+    name: 'Tom Mitchell',
     message:
-      "Cypress's robust testing capabilities have elevated our development standards. We work more harmoniously, and our releases are more reliable.",
-  },
-  {
-    name: 'Katherine',
-    message:
-      "Cypress is a lifesaver for our cross-functional teams. We're more productive, and there's a shared sense of responsibility for product quality.",
-  },
-  {
-    name: 'Liam',
-    message:
-      "Cypress has helped us maintain high standards of quality. Our team's collaboration has improved, resulting in faster development cycles.",
-  },
-  {
-    name: 'Mia',
-    message:
-      "Cypress is a powerful tool that improved our productivity and collaboration. It's now an integral part of our development process.",
-  },
-  {
-    name: 'Nathan',
-    message:
-      "Cypress's user-friendly interface and detailed reporting have made testing a breeze. Our team's productivity is at an all-time high.",
-  },
-  {
-    name: 'Olivia',
-    message:
-      "We saw immediate benefits in terms of productivity and collaboration after adopting Cypress. It's an essential tool for our development workflow.",
-  },
-  {
-    name: 'Paul',
-    message:
-      "Cypress has streamlined our testing process and brought our teams closer. We're more efficient and deliver better results.",
-  },
-  {
-    name: 'Quinn',
-    message:
-      'Cypress has been a game-changer for us. Our productivity and collaboration have improved significantly, leading to better software.',
-  },
-  {
-    name: 'Rachel',
-    message:
-      'Thanks to Cypress, our testing process is now a seamless part of our development cycle. Our teams collaborate effortlessly.',
-  },
-  {
-    name: 'Sam',
-    message:
-      'Cypress is a fantastic tool that has revolutionized our workflow. Our productivity and collaboration have reached new heights.',
+      "As a developer, I appreciate Arcane's API and integration capabilities. It connects with our entire tech stack while keeping everything user-friendly for non-tech team members.",
+    role: 'Software Architect',
+    company: 'DevOps Pro'
   },
 ];
 
@@ -114,29 +89,95 @@ export const PRICING_CARDS = [
   {
     planType: 'Free Plan',
     price: '0',
-    description: 'Limited block trials  for teams',
-    highlightFeature: '',
+    description: 'Perfect for personal use and small teams',
+    highlightFeature: 'Get started for free',
     freatures: [
-      'Unlimited blocks for teams',
-      'Unlimited file uploads',
-      '30 day page history',
-      'Invite 2 guests',
+      'Up to 3 workspaces',
+      '1GB file storage',
+      'Basic templates library',
+      'Real-time collaboration',
+      'Mobile app access',
+      'Community support',
     ],
   },
   {
     planType: 'Pro Plan',
-    price: '12.99',
-    description: 'Billed annually. $17 billed monthly',
-    highlightFeature: 'Everything in free +',
+    price: '12',
+    description: 'Billed annually. $15 billed monthly',
+    highlightFeature: 'Everything in Free +',
     freatures: [
-      'Unlimited blocks for teams',
-      'Unlimited file uploads',
-      '1 year day page history',
-      'Invite 10 guests',
+      'Unlimited workspaces',
+      '100GB file storage',
+      'Advanced AI assistance',
+      'Custom templates',
+      'Advanced integrations',
+      'Priority support',
+      'Version history',
+      'Team analytics',
+    ],
+  },
+  {
+    planType: 'Enterprise',
+    price: '25',
+    description: 'Custom pricing for large teams',
+    highlightFeature: 'Everything in Pro +',
+    freatures: [
+      'Unlimited storage',
+      'Advanced security (SSO, SAML)',
+      'Custom integrations',
+      'Dedicated success manager',
+      'SLA guarantees',
+      'Advanced admin controls',
+      'Audit logs',
+      'White-label options',
     ],
   },
 ];
 
-export const PRICING_PLANS = { proplan: 'Pro Plan', freeplan: 'Free Plan' };
+export const PRICING_PLANS = { 
+  proplan: 'Pro Plan', 
+  freeplan: 'Free Plan',
+  enterprise: 'Enterprise'
+};
 
 export const MAX_FOLDERS_FREE_PLAN = 3;
+
+export const FEATURES = [
+  {
+    title: 'AI-Powered Content',
+    description: 'Smart suggestions, auto-completion, and content generation to boost your productivity.',
+    icon: '🤖'
+  },
+  {
+    title: 'Real-time Collaboration',
+    description: 'Work together seamlessly with live editing, comments, and instant synchronization.',
+    icon: '👥'
+  },
+  {
+    title: 'All-in-One Workspace',
+    description: 'Notes, tasks, databases, calendars, and whiteboards - everything in one place.',
+    icon: '🚀'
+  },
+  {
+    title: 'Advanced Integrations', 
+    description: 'Connect with your favorite tools like Slack, GitHub, Google Drive, and 100+ more.',
+    icon: '🔗'
+  },
+  {
+    title: 'Powerful Search',
+    description: 'Find anything instantly with our advanced search across all your content and files.',
+    icon: '🔍'
+  },
+  {
+    title: 'Enterprise Security',
+    description: 'Bank-level encryption, SSO, SAML, and compliance with SOC 2 and GDPR.',
+    icon: '🔒'
+  }
+];
+
+export const STATS = [
+  { number: '100K+', label: 'Active Users' },
+  { number: '50M+', label: 'Documents Created' },
+  { number: '99.9%', label: 'Uptime' },
+  { number: '4.9/5', label: 'User Rating' }
+];

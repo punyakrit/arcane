@@ -198,7 +198,11 @@ body, html{
 }
 
 .animate-slide{
-  animation: 15s slide infinite; 
+  animation: 15s slide infinite linear; 
+}
+
+.animate-slide-reverse{
+  animation: 15s slide-reverse infinite linear; 
 }
 
 @keyframes slide {
@@ -207,6 +211,15 @@ body, html{
   }
   to {
     transform: translateX(-100%);
+  }
+}
+
+@keyframes slide-reverse {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
   }
 }
 
