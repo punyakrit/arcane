@@ -1,5 +1,5 @@
 export const dynamic = 'force-dynamic'
-import QuillEditors from '@/components/quillEditor/QuillEditors'
+import QuillEditors from '@/components/quillEditor/quillEditors'
 import React from 'react'
 
 async function page({params}:{params:{fileId:string, folderId:string, workspaceId:string}}) {
